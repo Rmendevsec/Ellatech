@@ -1,0 +1,126 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
+  generatedFileExtension = "js"
+  importFileExtension    = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum Role {
+  CUSTOMER
+  DRIVER
+  MERCHANT
+  ADMIN
+}
+
+enum KYCStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum VehicleType {
+  BICYCLE
+  MOTORCYCLE
+  CAR
+  TRUCK
+}
+
+enum DriverLevel {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+
+model User {
+  id            String    @id @default(uuid())
+  email         String?   @unique
+  phone         String    @unique
+  passwordHash  String
+  role          Role      @default(CUSTOMER)
+  isVerified    Boolean   @default(false)
+  
+  kycProfile    KYCProfile?
+  vehicles      Vehicle[]
+  driverProfile DriverProfile?
+  merchantProfile MerchantProfile?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model KYCProfile {
+  id                  String     @id @default(uuid())
+  userId              String     @unique
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  fullName            String
+  nationalIdNumber    String     @unique
+  nationalIdImageUrl  String
+  
+  emergencyContactName     String
+  emergencyContactPhone    String
+  emergencyContactAddress  String
+  
+  tradeLicenseUrl     String?
+  tinNumber           String?    @unique
+  storeAddress        String?
+  storeNumber         String?
+  
+  drivingLicenseUrl   String?
+  
+  status              KYCStatus @default(PENDING)
+  ocrVerified         Boolean   @default(false)
+  rejectionReason     String?
+  
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model Vehicle {
+  id            String      @id @default(uuid())
+  driverId      String
+  driver        User        @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  
+  type          VehicleType
+  plateNumber   String      @unique
+  make          String
+  model         String
+  year          Int
+  chassisNumber String?
+  
+  createdAt     DateTime    @default(now())
+}
+
+model DriverProfile {
+  id                String      @id @default(uuid())
+  userId            String      @unique
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  level             DriverLevel @default(BRONZE)
+  rating            Float       @default(5.0)
+  totalDeliveries   Int         @default(0)
+  walletBalance     Float       @default(0.0)
+  isOnline          Boolean     @default(false)
+  
+  currentLatitude   Float?
+  currentLongitude  Float?
+}
+
+model MerchantProfile {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  storeName       String
+  rating          Float     @default(5.0)
+  walletBalance   Float     @default(0.0)
+  isApproved      Boolean   @default(false)
+}
