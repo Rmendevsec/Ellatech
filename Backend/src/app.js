@@ -1,24 +1,23 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import authRoutes from './routes/authRoutes.js';
-
+import vehicleRoutes from './routes/vehicleRoutes.js'; 
 const app = express();
 
-// Security Middleware
-app.use(helmet()); // Sets HTTP headers for security
-app.use(cors()); // Allow cross-origin requests
-app.use(express.json()); // Parse JSON bodies
+app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(cors());
+app.use(express.json());
 
-// Routes
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 app.use('/api/auth', authRoutes);
-
-// Health Check
+app.use('/api/vehicles', vehicleRoutes); 
 app.get('/', (req, res) => {
-  res.status(200).json({ status: 'success', message: 'Merkato Backend API is running smoothly 🚀' });
+  res.status(200).json({ status: 'success', message: 'Merkato Backend API is running smoothly' });
 });
 
-// Global Error Handler (fallback)
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong on the server' });

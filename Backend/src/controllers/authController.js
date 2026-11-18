@@ -3,12 +3,10 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import prisma from '../config/db.js';
 
-// --- Zod Validation Schemas ---
 const registerSchema = z.object({
   email: z.string().email().optional(),
-  phone: z.string().min(10), // Add Ethiopian phone regex later
+  phone: z.string().min(10),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(['CUSTOMER', 'DRIVER', 'MERCHANT']).default('CUSTOMER'),
 });
 
 const loginSchema = z.object({
@@ -16,23 +14,16 @@ const loginSchema = z.object({
   password: z.string(),
 });
 
-// --- Helper Functions ---
 const generateTokens = (userId) => {
   const accessToken = jwt.sign({ id: userId }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
   const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
   return { accessToken, refreshToken };
 };
 
-// --- Controllers ---
-
-// @desc    Register a new user
-// @route   POST /api/auth/register
-export const registerUser = async (req, res) => {
+const createUser = async (req, res, assignedRole) => {
   try {
-    // 1. Validate request body
     const validatedData = registerSchema.parse(req.body);
 
-    // 2. Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
@@ -46,25 +37,22 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User with this phone or email already exists' });
     }
 
-    // 3. Hash the password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(validatedData.password, salt);
 
-    // 4. Create user in database
     const user = await prisma.user.create({
       data: {
         phone: validatedData.phone,
         email: validatedData.email,
         passwordHash,
-        role: validatedData.role,
+        role: assignedRole, 
       }
     });
 
-    // 5. Generate Tokens
     const { accessToken, refreshToken } = generateTokens(user.id);
 
     res.status(201).json({
-      message: 'User registered successfully',
+      message: `${assignedRole} registered successfully`,
       user: { id: user.id, phone: user.phone, email: user.email, role: user.role },
       accessToken,
       refreshToken
@@ -79,14 +67,18 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
+// --- Controllers ---
+
+export const registerCustomer = (req, res) => createUser(req, res, 'CUSTOMER');
+
+export const registerDriver = (req, res) => createUser(req, res, 'DRIVER');
+
+export const registerMerchant = (req, res) => createUser(req, res, 'MERCHANT');
+
 export const loginUser = async (req, res) => {
   try {
-    // 1. Validate request body
     const validatedData = loginSchema.parse(req.body);
 
-    // 2. Find user
     const user = await prisma.user.findUnique({
       where: { phone: validatedData.phone }
     });
@@ -95,13 +87,11 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // 3. Check password
     const isMatch = await bcrypt.compare(validatedData.password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // 4. Generate Tokens
     const { accessToken, refreshToken } = generateTokens(user.id);
 
     res.status(200).json({
@@ -120,8 +110,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// @desc    Get current user profile (Protected)
-// @route   GET /api/auth/me
 export const getMe = async (req, res) => {
   res.status(200).json({ user: req.user });
 };
