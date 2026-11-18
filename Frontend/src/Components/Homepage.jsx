@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-/* ============ DATA — Live images with Unsplash fallbacks ============ */
+/* ============ DATA — Live images ============ */
 const U = (id, w = 800) => `https://images.unsplash.com/photo-${id}?w=${w}&auto=format&fit=crop`;
 const CATS = [
   ["Electronics", [U("1498049794561-7780e7231661", 400)]],
@@ -45,9 +45,9 @@ const COLL = [
 ];
 
 const PERKS = [
-  ["M5 12l5 5 9-10", "Secure checkout"], ["M3 6h11v10H3zM14 9h4l3 3v4h-7", "Delivery to your home"],
-  ["M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18", "Local & international"],
-  ["M12 7v5l3 2M12 3a9 9 0 100 18 9 9 0 000-18z", "Order anytime"],
+  // ["M5 12l5 5 9-10", "Secure checkout"], ["M3 6h11v10H3zM14 9h4l3 3v4h-7", "Delivery to your home"],
+  // ["M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18", "Local & international"],
+  // ["M12 7v5l3 2M12 3a9 9 0 100 18 9 9 0 000-18z", "Order anytime"],
 ];
 
 const SOCIAL = [
@@ -118,7 +118,6 @@ export default function MerkatoLandingPro() {
   const [focus, setFocus] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
   const [emailMsg, setEmailMsg] = useState("");
   const searchRef = useRef(null);
@@ -136,7 +135,6 @@ export default function MerkatoLandingPro() {
     window.addEventListener("keydown", key);
     return () => { window.removeEventListener("scroll", on); window.removeEventListener("keydown", key); };
   }, []);
-  useEffect(() => { const t = setInterval(() => setStep((s) => (s + 1) % 4), 3200); return () => clearInterval(t); }, []);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2200); return () => clearTimeout(t); }, [toast]);
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; }, [open]);
 
@@ -152,7 +150,6 @@ export default function MerkatoLandingPro() {
   const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   const pickCat = (c) => { setCat(c); setQ(""); go("products"); };
   const pickSuggest = (p) => { setQ(p.name); setCat("All"); setFocus(false); go("products"); };
-  const onMove = (e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty("--mx", ((e.clientX - r.left) / r.width - 0.5).toFixed(3)); e.currentTarget.style.setProperty("--my", ((e.clientY - r.top) / r.height - 0.5).toFixed(3)); };
   const subscribe = (e) => { e.preventDefault(); if (/^\S+@\S+\.\S+$/.test(email)) { setEmailMsg("You're subscribed. Welcome to Merkato!"); setEmail(""); } else setEmailMsg("Enter a valid email address."); };
   const checkout = () => { setCart({}); setDone(true); };
   const scrollRail = (d) => rail.current?.scrollBy({ left: d * 320, behavior: "smooth" });
@@ -164,9 +161,12 @@ export default function MerkatoLandingPro() {
 
       {/* NAV */}
       <header className={`nav ${scrolled ? "sc" : ""}`}>
-        <a href="#top" className="brand" onClick={(e) => { e.preventDefault(); go("top"); }}><span className="mark">M</span>Merkato</a>
+        <a href="#top" className="brand" onClick={(e) => { e.preventDefault(); go("top"); }}>
+          <img src="/logo.png" alt="Merkato Logo" className="logo-img" />
+          Merkato
+        </a>
         <nav className={`links ${menu ? "show" : ""}`}>
-          {[["Home", "top"], ["Categories", "cats"], ["Products", "products"], ["How it works", "how"], ["New", "new"]].map(([l, id]) => (
+          {[["Home", "top"], ["Categories", "cats"], ["Products", "products"], ["How it works", "how"], ["New", "new"],["Videos", "videos"]].map(([l, id]) => (
             <a key={id} href={"#" + id} onClick={(e) => { e.preventDefault(); setMenu(false); go(id); }}>{l}</a>
           ))}
         </nav>
@@ -268,16 +268,17 @@ export default function MerkatoLandingPro() {
         </div>
       </section>
 
-      {/* STEPS */}
+      {/* STEPS — Solid Orange, No Animation */}
       <section id="how" className="sec">
         <Reveal><h2>Shop in 4 Simple Steps</h2>
           <p className="sub">From browsing to delivery, shopping on Merkato is effortless. Follow these simple steps and enjoy a smooth experience.</p></Reveal>
         <div className="steps">
           {STEPS.map(([t, d, p], i) => (
-            <button key={t} className={`step ${step === i ? "on" : ""}`} onMouseEnter={() => setStep(i)} onFocus={() => setStep(i)} onClick={() => setStep(i)}>
-              <Ic d={p} s={38} w={1.5} /><strong>{t}</strong><span>{d}</span>
-              <i className="fill" key={step === i ? "a" + step : i} />
-            </button>
+            <div key={t} className="step">
+              <div className="step-ic"><Ic d={p} s={32} w={1.5} /></div>
+              <strong>{t}</strong>
+              <span>{d}</span>
+            </div>
           ))}
         </div>
       </section>
@@ -319,7 +320,7 @@ export default function MerkatoLandingPro() {
         </Reveal>
       </section>
 
-      {/* FOOTER */}
+      {/* FOOTER — Modern Light Redesign */}
       <footer className="foot">
         <div id="newsletter" className="news">
           <div><h2>Get new arrivals first</h2><p>Join Merkato and hear about new products and offers.</p></div>
@@ -331,7 +332,10 @@ export default function MerkatoLandingPro() {
         </div>
         <div className="cols2">
           <div className="fb">
-            <div className="brand"><span className="mark">M</span>Merkato</div>
+            <div className="brand">
+              <img src="/logo.png" alt="Merkato Logo" className="logo-img" />
+              Merkato
+            </div>
             <p>Your one-stop marketplace for Ethiopian and international products, delivered safely to your home.</p>
             <div className="soc">{SOCIAL.map(([n, d]) => <a key={n} href="#" aria-label={n} onClick={(e) => e.preventDefault()}><Ic d={d} s={18} /></a>)}</div>
             <p className="loc"><Ic d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11zM12 12a2 2 0 100-4 2 2 0 000 4z" s={16} />Addis Ababa, Ethiopia</p>
@@ -395,7 +399,7 @@ const css = `
 .nav{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px clamp(16px,4vw,56px);transition:.3s}
 .nav.sc{background:rgba(255,255,255,.82);backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--ln)}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.02em}
-.mark{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:var(--o);color:#fff;font-weight:800}
+.logo-img{width:34px;height:34px;border-radius:11px;object-fit:contain}
 .links{display:flex;gap:clamp(18px,3vw,44px);font-weight:500;font-size:15px}
 .links a{position:relative;padding:4px 0;color:#344054}
 .links a::after{content:"";position:absolute;left:0;bottom:-2px;height:2px;width:100%;background:var(--o);transform:scaleX(0);transform-origin:left;transition:transform .25s}
@@ -489,15 +493,13 @@ h2{font-weight:800;font-size:clamp(28px,3.4vw,46px);letter-spacing:-.03em;line-h
 .info{padding:14px 4px 0}.info span{font-size:12px;color:var(--mut);font-weight:600}
 .info h3{font-size:16px;font-weight:700;margin:2px 0 4px;letter-spacing:-.01em}.info b{color:var(--o);font-size:15px}
 
+/* STEPS — Solid Orange, No Animation */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.6vw,24px);margin-top:44px}
-.step{position:relative;overflow:hidden;text-align:left;display:flex;flex-direction:column;gap:12px;padding:clamp(20px,2.2vw,32px);min-height:260px;border-radius:28px;background:var(--bg);transition:.45s cubic-bezier(.2,.8,.2,1)}
-.step svg{color:var(--o);transition:.3s}
-.step strong{font-size:19px;letter-spacing:-.01em;margin-top:auto}
-.step span{color:var(--mut);font-size:14px}
-.step.on{background:var(--o);color:#fff;transform:translateY(-8px);box-shadow:0 30px 50px -24px rgba(252,82,7,.7)}
-.step.on svg,.step.on span{color:#fff}.step.on span{opacity:.9}
-.fill{position:absolute;left:0;bottom:0;height:5px;width:0;background:rgba(255,255,255,.7)}
-.step.on .fill{animation:fill 3.2s linear both}
+.step{background:var(--o);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:clamp(24px,3vw,40px);border-radius:24px;text-align:center;transition:transform .3s,box-shadow .3s}
+.step:hover{transform:translateY(-6px);box-shadow:0 20px 40px -10px rgba(252,82,7,.4)}
+// .step-ic{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;color:#fff}
+.step strong{font-size:18px;font-weight:700}
+.step span{font-size:14px;opacity:.9;line-height:1.4}
 
 .arrows{display:flex;gap:10px}
 .arrows button{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--ln);display:grid;place-items:center;transition:.2s}
@@ -530,26 +532,30 @@ h2{font-weight:800;font-size:clamp(28px,3.4vw,46px);letter-spacing:-.03em;line-h
 .perk svg{color:var(--o)}
 .p1{left:1%;top:6%}.p2{right:1%;top:8%}.p3{left:1%;bottom:8%}.p4{right:1%;bottom:6%}
 
-.foot{margin-top:clamp(60px,8vw,120px);background:var(--ink);color:#fff;padding:clamp(40px,5vw,72px) clamp(16px,4vw,56px) 28px}
-.news{max-width:1328px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:24px;padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.12)}
-.news p{color:#98a2b3;margin-top:8px}
-.news form{display:flex;flex-wrap:wrap;gap:10px;flex:1 1 380px;max-width:520px}
-.news input{flex:1;min-width:0;padding:15px 22px;border-radius:99px;border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font:500 15px 'Plus Jakarta Sans',sans-serif;outline:0}
-.news input:focus{border-color:var(--o)}
-.news small{width:100%;min-height:18px;color:#fdb022;font-size:13px}
+/* FOOTER — Modern Light Redesign */
+.foot{background:#f9fafb;color:var(--ink);padding:clamp(40px,5vw,72px) clamp(16px,4vw,56px) 28px;border-top:1px solid var(--ln);margin-top:clamp(60px,8vw,120px)}
+.news{max-width:1328px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:24px;padding-bottom:48px;border-bottom:1px solid var(--ln)}
+.news h2{font-size:clamp(24px,2.5vw,32px);color:var(--ink)}
+.news p{color:var(--mut);margin-top:8px}
+.news form{display:flex;flex-wrap:wrap;gap:10px;flex:1 1 380px;max-width:520px;position:relative}
+.news input{flex:1;min-width:0;padding:15px 22px;border-radius:99px;border:1.5px solid var(--ln);background:#fff;color:var(--ink);font:500 15px 'Plus Jakarta Sans',sans-serif;outline:0}
+.news input:focus{border-color:var(--o);box-shadow:0 0 0 4px rgba(252,82,7,.1)}
+.news small{width:100%;min-height:18px;color:#d92d20;font-size:13px;position:absolute;bottom:-22px;left:10px}
+
 .cols2{max-width:1328px;margin:0 auto;display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:40px;padding:56px 0 40px}
-.fb p{color:#98a2b3;margin:16px 0;max-width:340px;font-size:14px}
+.fb p{color:var(--mut);margin:16px 0;max-width:340px;font-size:14px}
 .soc{display:flex;gap:10px}
-.soc a{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);display:grid;place-items:center;transition:.25s}
-.soc a:hover{background:var(--o);transform:translateY(-3px)}
-.fb .loc{display:flex;align-items:center;gap:8px;color:#d0d5dd}
-.cols2 ul{display:flex;flex-direction:column;gap:12px;font-size:14px;color:#98a2b3}
-.cols2 .h{color:#fff;font-weight:700;margin-bottom:4px}
+.soc a{width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid var(--ln);display:grid;place-items:center;color:var(--mut);transition:.25s}
+.soc a:hover{background:var(--o);color:#fff;border-color:var(--o);transform:translateY(-3px)}
+.fb .loc{display:flex;align-items:center;gap:8px;color:var(--ink);font-weight:500}
+.cols2 ul{display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--mut)}
+.cols2 .h{color:var(--ink);font-weight:700;margin-bottom:4px}
 .cols2 ul a{display:inline-block;transition:.2s}.cols2 ul a:hover{color:var(--o);transform:translateX(4px)}
-.legal2{max-width:1328px;margin:0 auto;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;color:#667085;font-size:13px}
-.pay{display:flex;gap:8px;flex-wrap:wrap}.pay span{border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:4px 10px;color:#d0d5dd;font-weight:600;font-size:12px}
-.totop{display:flex;align-items:center;gap:8px;color:#fff;font-weight:600;font-size:13px;border:1.5px solid rgba(255,255,255,.2);border-radius:99px;padding:9px 18px;transition:.2s}
-.totop:hover{background:var(--o);border-color:var(--o)}
+
+.legal2{max-width:1328px;margin:0 auto;padding-top:24px;border-top:1px solid var(--ln);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;color:var(--mut);font-size:13px}
+.pay{display:flex;gap:8px;flex-wrap:wrap}.pay span{border:1px solid var(--ln);border-radius:8px;padding:4px 10px;color:var(--ink);font-weight:600;font-size:12px;background:#fff}
+.totop{display:flex;align-items:center;gap:8px;color:var(--ink);font-weight:600;font-size:13px;border:1.5px solid var(--ln);border-radius:99px;padding:9px 18px;transition:.2s;background:#fff}
+.totop:hover{background:var(--o);color:#fff;border-color:var(--o)}
 
 .scrim{position:fixed;inset:0;background:rgba(16,24,40,.5);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:.3s;z-index:70}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -592,13 +598,12 @@ h2{font-weight:800;font-size:clamp(28px,3.4vw,46px);letter-spacing:-.03em;line-h
 .buy s{font-size:12px;color:var(--mut)}
 .addb{width:44px;height:44px;flex:none;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;transition:.25s}
 .addb:hover{background:var(--o);transform:scale(1.08) rotate(-8deg)}
+
 @keyframes bob{50%{transform:translateY(-9px)}}
 @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes in{from{opacity:0;transform:translateY(30px) scale(.94)}}
 @keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
-@keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fill{to{width:100%}}
-@keyframes float{50%{transform:translate(-50%,-8px)}}
 
 @media (max-width:1024px){
   .grid{grid-template-columns:repeat(3,1fr)}.steps{grid-template-columns:repeat(2,1fr)}
@@ -609,7 +614,7 @@ h2{font-weight:800;font-size:clamp(28px,3.4vw,46px);letter-spacing:-.03em;line-h
   .burger{display:grid}.hide-m{display:none}
   .links{position:absolute;left:12px;right:12px;top:100%;flex-direction:column;gap:4px;background:#fff;border-radius:20px;padding:12px;box-shadow:0 24px 50px -12px rgba(16,24,40,.3);opacity:0;pointer-events:none;transform:translateY(-8px);transition:.25s}
   .links.show{opacity:1;pointer-events:auto;transform:none}.links a{padding:12px 14px}
-  .grid{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:1fr}.step{min-height:180px}
+  .grid{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:1fr}
   .search kbd{display:none}
   .orbit2{aspect-ratio:auto;display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .rings{display:none}
@@ -619,3 +624,4 @@ h2{font-weight:800;font-size:clamp(28px,3.4vw,46px);letter-spacing:-.03em;line-h
 }
 @media (prefers-reduced-motion:reduce){.mk *,.mk *::before,.mk *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.rv{opacity:1;transform:none}}
 `;
+
