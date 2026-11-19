@@ -7,6 +7,7 @@ import vehicleRoutes from './routes/vehicleRoutes.js';
 import kycRoutes from './routes/kycRoutes.js'; 
 import productRoutes from './routes/productRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: false })); 
@@ -21,6 +22,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/kyc', kycRoutes); 
 app.use('/api/admin', adminRoutes); 
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
 app.get('/', (req, res) => {
   res.status(200).json({ status: 'success', message: 'Merkato Backend API is running smoothly 🚀' });
 });
