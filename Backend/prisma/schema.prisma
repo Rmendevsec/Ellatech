@@ -111,6 +111,7 @@ model DriverProfile {
   currentLongitude  Float?
 }
 
+
 model MerchantProfile {
   id              String    @id @default(uuid())
   userId          String    @unique
@@ -120,4 +121,24 @@ model MerchantProfile {
   rating          Float     @default(5.0)
   walletBalance   Float     @default(0.0)
   isApproved      Boolean   @default(false)
+  
+  products        Product[]
+}
+
+
+model Product {
+  id                String          @id @default(uuid())
+  merchantProfileId String
+  merchantProfile   MerchantProfile @relation(fields: [merchantProfileId], references: [id], onDelete: Cascade)
+  
+  name              String
+  description       String?
+  price             Float
+  stock             Int             @default(0)
+  imageUrl          String?
+  category          String?         // e.g., "Electronics", "Fashion"
+  isActive          Boolean         @default(true)
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 }

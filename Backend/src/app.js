@@ -5,6 +5,7 @@ import path from 'path';
 import authRoutes from './routes/authRoutes.js';
 import vehicleRoutes from './routes/vehicleRoutes.js';
 import kycRoutes from './routes/kycRoutes.js'; 
+import productRoutes from './routes/productRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 const app = express();
 
@@ -19,7 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/kyc', kycRoutes); 
 app.use('/api/admin', adminRoutes); 
-
+app.use('/api/products', productRoutes);
 app.get('/', (req, res) => {
   res.status(200).json({ status: 'success', message: 'Merkato Backend API is running smoothly 🚀' });
 });
