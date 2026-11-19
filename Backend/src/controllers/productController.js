@@ -27,7 +27,7 @@ export const createProduct = async (req, res) => {
 
     const validatedData = productSchema.parse(req.body);
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+const imageUrl = req.files && req.files.length > 0 ? `/uploads/${req.files[0].filename}` : null;
 
     const product = await prisma.product.create({
       data: {
