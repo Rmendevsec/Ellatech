@@ -4,11 +4,10 @@ import prisma from '../config/db.js';
 const productSchema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
-  price: z.string().transform((val) => parseFloat(val)), // Form-data sends numbers as strings
-  stock: z.string().transform((val) => parseInt(val, 10)),
+  price: z.coerce.number().positive(),
+  stock: z.coerce.number().int().nonnegative(),
   category: z.string().optional(),
 });
-
 
 export const createProduct = async (req, res) => {
   try {
