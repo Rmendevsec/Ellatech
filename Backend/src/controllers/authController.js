@@ -49,6 +49,23 @@ const createUser = async (req, res, assignedRole) => {
       }
     });
 
+    if (assignedRole === 'MERCHANT') {
+      await prisma.merchantProfile.create({
+        data: {
+          userId: user.id,
+          storeName: `Store-${validatedData.phone}`,
+          isApproved: false
+        }
+      });
+    } else if (assignedRole === 'DRIVER') {
+      await prisma.driverProfile.create({
+        data: {
+          userId: user.id,
+          isOnline: false
+        }
+      });
+    }
+
     const { accessToken, refreshToken } = generateTokens(user.id);
 
     res.status(201).json({
@@ -60,52 +77,35 @@ const createUser = async (req, res, assignedRole) => {
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      return res.status(400).json({ message: 'Validation error', details: error.errors });
     }
     console.error(error);
     res.status(500).json({ message: 'Server error during registration' });
   }
 };
 
-// --- Controllers ---
-
 export const registerCustomer = (req, res) => createUser(req, res, 'CUSTOMER');
-
 export const registerDriver = (req, res) => createUser(req, res, 'DRIVER');
-
 export const registerMerchant = (req, res) => createUser(req, res, 'MERCHANT');
 
 export const loginUser = async (req, res) => {
   try {
     const validatedData = loginSchema.parse(req.body);
-
-    const user = await prisma.user.findUnique({
-      where: { phone: validatedData.phone }
-    });
-
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    const user = await prisma.user.findUnique({ where: { phone: validatedData.phone } });
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
     const isMatch = await bcrypt.compare(validatedData.password, user.passwordHash);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
     const { accessToken, refreshToken } = generateTokens(user.id);
-
     res.status(200).json({
       message: 'Login successful',
       user: { id: user.id, phone: user.phone, email: user.email, role: user.role },
       accessToken,
       refreshToken
     });
-
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Validation error', errors: error.errors });
-    }
-    console.error(error);
+    if (error instanceof z.ZodError) return res.status(400).json({ message: 'Validation error', details: error.errors });
     res.status(500).json({ message: 'Server error during login' });
   }
 };
