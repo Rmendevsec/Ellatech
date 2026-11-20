@@ -78,13 +78,22 @@ export const createOrder = async (req, res) => {
 };
 
 
+
 export const getAvailableOrders = async (req, res) => {
   try {
     const orders = await prisma.order.findMany({
       where: { status: 'PENDING' },
       include: {
-        merchantProfile: { select: { storeName: true, storeAddress: true } },
-        items: { include: { product: { select: { name: true } } } }
+        merchantProfile: { 
+          select: { 
+            storeName: true
+          } 
+        },
+        items: { 
+          include: { 
+            product: { select: { name: true } } 
+          } 
+        }
       },
       orderBy: { createdAt: 'asc' }
     });
