@@ -52,7 +52,6 @@ export const initSocket = (httpServer) => {
         socket.emit('error', 'Failed to join room');
       }
     });
-
     socket.on('driver_location', async ({ orderId, latitude, longitude }) => {
       if (socket.user.role !== 'DRIVER') return;
 
@@ -63,10 +62,15 @@ export const initSocket = (httpServer) => {
         timestamp: new Date()
       });
 
-      await prisma.driverProfile.update({
-        where: { userId: socket.user.id },
-        data: { currentLatitude: latitude, currentLongitude: longitude }
-      });
+      try {
+        await prisma.driverProfile.upsert({
+          where: { userId: socket.user.id },
+          update: { currentLatitude: latitude, currentLongitude: longitude },
+          create: { userId: socket.user.id, currentLatitude: latitude, currentLongitude: longitude }
+        });
+      } catch (err) {
+        console.error("Location update error:", err.message);
+      }
     });
 
     socket.on('send_message', ({ orderId, message }) => {
