@@ -131,6 +131,7 @@ export const acceptOrder = async (req, res) => {
   }
 };
 
+
 export const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -158,16 +159,27 @@ export const updateOrderStatus = async (req, res) => {
       const platformFee = order.totalAmount * 0.10;
       const merchantPayout = order.totalAmount - platformFee;
 
-      await prisma.merchantProfile.update({
+      await prisma.merchantProfile.upsert({
         where: { id: order.merchantProfileId },
-        data: { walletBalance: { increment: merchantPayout } }
+        update: { walletBalance: { increment: merchantPayout } },
+        create: { 
+          userId: order.merchantProfile.userId, 
+          storeName: `Store-${order.merchantProfile.userId.substring(0, 5)}`, 
+          walletBalance: merchantPayout,
+          isApproved: true
+        }
       });
 
-      await prisma.driverProfile.update({
+      await prisma.driverProfile.upsert({
         where: { userId: driverId },
-        data: { 
+        update: { 
           walletBalance: { increment: order.deliveryFee },
           totalDeliveries: { increment: 1 }
+        },
+        create: {
+          userId: driverId,
+          walletBalance: order.deliveryFee,
+          totalDeliveries: 1
         }
       });
     }
