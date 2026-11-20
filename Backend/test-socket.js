@@ -1,10 +1,10 @@
 // test-socket.js
 import { io } from 'socket.io-client';
 
-// Replace with your actual tokens and order ID
-const CUSTOMER_TOKEN = 'PASTE_YOUR_CUSTOMER_JWT_HERE';
-const DRIVER_TOKEN = 'PASTE_YOUR_DRIVER_JWT_HERE';
-const ORDER_ID = 'PASTE_YOUR_ORDER_ID_HERE';
+// ⚠️ REPLACE THESE WITH REAL VALUES FROM YOUR DATABASE/THUNDER CLIENT
+const CUSTOMER_TOKEN = 'PASTE_CUSTOMER_JWT_HERE';
+const DRIVER_TOKEN = 'PASTE_DRIVER_JWT_HERE';
+const ORDER_ID = 'PASTE_ORDER_ID_HERE';
 
 // 1. Connect as Customer
 const customerSocket = io('http://localhost:5000', {
@@ -14,6 +14,10 @@ const customerSocket = io('http://localhost:5000', {
 customerSocket.on('connect', () => {
   console.log('🟢 Customer connected');
   customerSocket.emit('join_order_room', { orderId: ORDER_ID });
+});
+
+customerSocket.on('connect_error', (err) => {
+  console.error('🔴 Customer Connection Error:', err.message);
 });
 
 customerSocket.on('location_update', (data) => {
@@ -35,15 +39,20 @@ driverSocket.on('connect', () => {
 
   // Simulate sending location every 3 seconds
   setInterval(() => {
-    const lat = 9.0300 + Math.random() * 0.01; // Random coordinates around Addis
+    const lat = 9.0300 + Math.random() * 0.01; 
     const lng = 38.7400 + Math.random() * 0.01;
     
-    console.log(`Driver sending location: ${lat}, ${lng}`);
+    console.log(`🚗 Driver sending location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
     driverSocket.emit('driver_location', { orderId: ORDER_ID, latitude: lat, longitude: lng });
   }, 3000);
 
-  // Simulate sending a chat message after 5 seconds
+  // Simulate sending a chat message after 4 seconds
   setTimeout(() => {
+    console.log('✉️ Driver sending chat message...');
     driverSocket.emit('send_message', { orderId: ORDER_ID, message: 'Hello! I have picked up your order.' });
-  }, 5000);
+  }, 4000);
+});
+
+driverSocket.on('connect_error', (err) => {
+  console.error('🔴 Driver Connection Error:', err.message);
 });
