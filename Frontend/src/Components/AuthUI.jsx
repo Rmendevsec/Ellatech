@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export const Logo = () => (
-  <svg className="logo" width="104" height="112" viewBox="0 0 104 112" role="img" aria-label="Merkato Gebeya">
+  <svg className="logo" width="104" height="112" viewBox="0 0 104 112">
     <g fill="none" stroke="#FF5208" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="52" cy="17" r="10" strokeWidth="6" />
       <path d="M52 29L47 60M52 36L74 40L84 37M52 36L32 47L27 52M47 60L35 82M47 60L62 70L71 81" />
@@ -15,7 +15,7 @@ export const Logo = () => (
   </svg>
 );
 
-export const Eye = ({ off }) => (
+const Eye = ({ off }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d={off ? "M3 3l18 18M10.6 5.1A9.8 9.8 0 0112 5c6 0 10 7 10 7a17 17 0 01-3.2 3.9M6.6 6.6A17 17 0 002 12s4 7 10 7a9.7 9.7 0 004.4-1M9.9 9.9a3 3 0 004.2 4.2" : "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 100 6 3 3 0 000-6z"} />
   </svg>
@@ -41,20 +41,65 @@ export function Field({ label, id, type = "text", value, onChange, onBlur, error
     <div className="field rise" style={{ "--i": i }}>
       <label htmlFor={id}>{label}</label>
       <div className={`inp ${error ? "bad" : ""}`}>
-        <input id={id} name={id} type={pw && show ? "text" : type} value={value} placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)} onBlur={onBlur} />
-        {pw && (
-          <button type="button" className="eye" onClick={() => setShow(!show)}><Eye off={show} /></button>
-        )}
+        <input id={id} name={id} type={pw && show ? "text" : type} value={value}
+          onChange={(e) => onChange(e.target.value)} onBlur={onBlur} placeholder={placeholder} />
+        {pw && <button type="button" className="eye" onClick={() => setShow(!show)}><Eye off={show} /></button>}
       </div>
       {error && <p className="err" role="alert">{error}</p>}
     </div>
   );
 }
 
-export function Submit({ state, label, done }) {
+export function FileUpload({ label, id, accept = "image/*", file, onChange, error, i = 0 }) {
+  const [preview, setPreview] = useState("");
+
+  useEffect(() => {
+    if (!file) { setPreview(""); return; }
+    if (file.type?.startsWith("image/")) {
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [file]);
+
   return (
-    <button className={`cta ${state}`} disabled={state !== "idle"} type="submit">
+    <div className="field rise" style={{ "--i": i }}>
+      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id} className={`file-drop ${error ? "bad" : ""} ${file ? "has-file" : ""}`}>
+        <input id={id} type="file" accept={accept} onChange={(e) => onChange(e.target.files?.[0] || null)} hidden />
+        {file && preview ? (
+          <div className="file-preview">
+            <img src={preview} alt="preview" />
+            <div className="file-meta">
+              <b>{file.name}</b>
+              <small>Click to change</small>
+            </div>
+            <span className="file-check"><Check s={14} /></span>
+          </div>
+        ) : file ? (
+          <div className="file-preview">
+            <div className="file-icon">📎</div>
+            <div className="file-meta"><b>{file.name}</b><small>Click to change</small></div>
+            <span className="file-check"><Check s={14} /></span>
+          </div>
+        ) : (
+          <div className="file-empty">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M12 16V4M7 9l5-5 5 5M4 20h16" />
+            </svg>
+            <span>Click to upload an image</span>
+            <small>JPG, PNG · max 5MB</small>
+          </div>
+        )}
+      </label>
+      {error && <p className="err" role="alert">{error}</p>}
+    </div>
+  );
+}
+
+export function Submit({ state, label, done, disabled }) {
+  return (
+    <button className={`cta ${state}`} disabled={state !== "idle" || disabled} type="submit">
       {state === "loading" ? <i className="spin" /> : state === "done" ? <><Check />{done}</> : label}
     </button>
   );
