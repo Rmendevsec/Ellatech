@@ -14,6 +14,7 @@ function App() {
     <Route path="/auth" element={<UserRegistration />} />
     <Route path="/products" element={<ProductRegistration />} />
     <Route path="/auth-flow" element={<AuthFlow />} />
+    <Route path="/dashboard" element={<div className="p-10 text-center">Dashboard Coming Next...</div>} />
     <Route path="*" element={<NotFoundPage />} />
 
   </Routes>
