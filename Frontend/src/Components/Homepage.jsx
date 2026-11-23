@@ -105,7 +105,6 @@ const Reveal = ({ as: T = "div", className = "", children, ...p }) => {
   return <T ref={ref} className={`rv ${className}`} {...p}>{children}</T>;
 };
 
-/* ============ APP ============ */
 export default function MerkatoLandingPro() {
   const [cart, setCart] = useState(() => { try { return JSON.parse(localStorage.getItem("mk-cart")) || {}; } catch { return {}; } });
   const [open, setOpen] = useState(false);
@@ -174,7 +173,7 @@ export default function MerkatoLandingPro() {
           <button className="cartbtn" onClick={() => setOpen(true)} aria-label={`Open cart, ${count} items`}>
             <Ic d={I.cart} />{count > 0 && <b key={count} className="badge">{count}</b>}
           </button>
-          <button className="btn solid sm hide-m" onClick={() => go("newsletter")}>Register</button>
+          <button className="btn solid sm hide-m"> <a href="http://localhost:5173/auth">Register</a></button>
           <button className="burger" onClick={() => setMenu(!menu)} aria-label="Menu"><Ic d={menu ? I.x : I.menu} /></button>
         </div>
       </header>
@@ -201,7 +200,7 @@ export default function MerkatoLandingPro() {
         <p>Find everything you need from Merkato in one place. Order easily and get your items delivered safely to your home.</p>
         <div className="cta">
           <button className="btn solid" onClick={() => go("products")}>Shop Now</button>
-          <button className="btn line" onClick={() => go("how")}>Get Started</button>
+          <button className="btn line"><a href="http://localhost:5173/auth">Get Started</a></button>
         </div>
       </section>
 
